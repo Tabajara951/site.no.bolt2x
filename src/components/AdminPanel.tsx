@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { X, Plus, Trash2, LogOut, Youtube, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Plus, Trash2, LogOut, Youtube, Loader2, ChevronLeft, ChevronRight, GripVertical, Save, XCircle } from 'lucide-react';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { supabase } from '../lib/supabase';
 import { useAdmin } from '../contexts/AdminContext';
 import { extractYouTubeId, isValidYouTubeUrl, getYouTubeThumbnail, isYouTubeShorts } from '../utils/youtube.utils';
@@ -11,9 +14,85 @@ interface AdminPanelProps {
 
 const VIDEOS_PER_PAGE = 6;
 
+interface SortableVideoItemProps {
+  video: YouTubeVideo;
+  onDelete: (id: string) => void;
+}
+
+function SortableVideoItem({ video, onDelete }: SortableVideoItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: video.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-4 p-4 bg-slate-800 rounded-lg border border-slate-700 hover:border-emerald-500/30 transition-all group ${
+        isDragging ? 'shadow-2xl shadow-emerald-500/20 scale-105 z-50' : ''
+      }`}
+    >
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing text-slate-500 hover:text-emerald-400 transition-colors flex-shrink-0"
+        title="Drag to reorder"
+      >
+        <GripVertical size={24} />
+      </div>
+      <div className="relative flex-shrink-0">
+        <img
+          src={getYouTubeThumbnail(video.youtube_id)}
+          alt="Video thumbnail"
+          className="w-32 h-20 object-cover rounded"
+        />
+        {video.video_type === 'shorts' && (
+          <span className="absolute top-1 right-1 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded font-medium">
+            Shorts
+          </span>
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <p className="text-white font-medium truncate">{video.youtube_id}</p>
+          <span className={`text-xs px-2 py-0.5 rounded ${
+            video.video_type === 'shorts'
+              ? 'bg-red-600/20 text-red-400 border border-red-600/30'
+              : 'bg-emerald-600/20 text-emerald-400 border border-emerald-600/30'
+          }`}>
+            {video.video_type === 'shorts' ? '9:16' : '16:9'}
+          </span>
+        </div>
+        <p className="text-sm text-slate-400 truncate">{video.youtube_url}</p>
+        <p className="text-xs text-slate-500">
+          Added {new Date(video.created_at).toLocaleDateString()}
+        </p>
+      </div>
+      <button
+        onClick={() => onDelete(video.id)}
+        className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100 flex-shrink-0"
+      >
+        <Trash2 size={20} />
+      </button>
+    </div>
+  );
+}
+
 export function AdminPanel({ onClose }: AdminPanelProps) {
   const { logout } = useAdmin();
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);
+  const [originalVideos, setOriginalVideos] = useState<YouTubeVideo[]>([]);
   const [newVideoUrl, setNewVideoUrl] = useState('');
   const [selectedFormat, setSelectedFormat] = useState<'normal' | 'shorts'>('normal');
   const [loading, setLoading] = useState(true);
@@ -21,6 +100,17 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     fetchVideos();
@@ -39,6 +129,8 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
 
       if (fetchError) throw fetchError;
       setVideos(data || []);
+      setOriginalVideos(data || []);
+      setHasUnsavedChanges(false);
     } catch (err) {
       setError('Failed to load videos');
     } finally {
@@ -89,6 +181,7 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
       setSuccess('Video added successfully!');
       setNewVideoUrl('');
       setSelectedFormat('normal');
+      setHasUnsavedChanges(false);
       await fetchVideos();
 
       setTimeout(() => setSuccess(''), 3000);
@@ -112,6 +205,7 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
       if (deleteError) throw deleteError;
 
       setSuccess('Video deleted successfully!');
+      setHasUnsavedChanges(false);
       await fetchVideos();
 
       setTimeout(() => setSuccess(''), 3000);
@@ -145,6 +239,73 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
   const goToPage = (page: number) => {
     setCurrentPage(page);
   };
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveId(null);
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setVideos((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        const newOrder = arrayMove(items, oldIndex, newIndex);
+        setHasUnsavedChanges(true);
+        return newOrder;
+      });
+    }
+  };
+
+  const handleSaveOrder = () => {
+    setShowConfirmModal(true);
+  };
+
+  const confirmSaveOrder = async () => {
+    if (!supabase) return;
+
+    try {
+      setSaving(true);
+      setError('');
+
+      const updates = videos.map((video, index) => ({
+        id: video.id,
+        display_order: index,
+      }));
+
+      for (const update of updates) {
+        const { error: updateError } = await supabase
+          .from('youtube_videos')
+          .update({ display_order: update.display_order })
+          .eq('id', update.id);
+
+        if (updateError) throw updateError;
+      }
+
+      setSuccess('Video order saved successfully!');
+      setOriginalVideos([...videos]);
+      setHasUnsavedChanges(false);
+      setShowConfirmModal(false);
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError('Failed to save video order');
+      setVideos([...originalVideos]);
+      setHasUnsavedChanges(false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancelReorder = () => {
+    setVideos([...originalVideos]);
+    setHasUnsavedChanges(false);
+    setSuccess('');
+    setError('');
+  };
+
+  const activeVideo = videos.find(video => video.id === activeId);
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -245,6 +406,44 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
           </div>
         )}
 
+        {videos.length > 0 && !hasUnsavedChanges && (
+          <div className="mb-4 p-3 bg-slate-800/50 border border-slate-700/50 rounded-lg flex items-center gap-2 text-slate-400 text-sm">
+            <GripVertical size={18} className="text-slate-500" />
+            <span>Tip: Drag videos using the grip icon to reorder them. You can drag across pages!</span>
+          </div>
+        )}
+
+        {hasUnsavedChanges && (
+          <div className="mb-4 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-center justify-between">
+            <div className="flex items-center gap-2 text-amber-400">
+              <Save size={20} />
+              <span className="font-medium">You have unsaved changes</span>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleCancelReorder}
+                disabled={saving}
+                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                <XCircle size={18} />
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveOrder}
+                disabled={saving}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 hover:shadow-lg hover:shadow-emerald-500/25"
+              >
+                {saving ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <Save size={18} />
+                )}
+                Save Order
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="space-y-4">
           {loading ? (
             <div className="flex items-center justify-center py-12">
@@ -257,49 +456,61 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
             </div>
           ) : (
             <>
-              <div className="space-y-3 min-h-[400px]">
-                {currentVideos.map((video) => (
-                  <div
-                    key={video.id}
-                    className="flex items-center gap-4 p-4 bg-slate-800 rounded-lg border border-slate-700 hover:border-emerald-500/30 transition-all group"
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+              >
+                <div className="space-y-3 min-h-[400px]">
+                  <SortableContext
+                    items={videos.map(v => v.id)}
+                    strategy={verticalListSortingStrategy}
                   >
-                    <div className="relative">
-                      <img
-                        src={getYouTubeThumbnail(video.youtube_id)}
-                        alt="Video thumbnail"
-                        className="w-32 h-20 object-cover rounded"
+                    {currentVideos.map((video) => (
+                      <SortableVideoItem
+                        key={video.id}
+                        video={video}
+                        onDelete={handleDeleteVideo}
                       />
-                      {video.video_type === 'shorts' && (
-                        <span className="absolute top-1 right-1 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded font-medium">
-                          Shorts
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-white font-medium truncate">{video.youtube_id}</p>
-                        <span className={`text-xs px-2 py-0.5 rounded ${
-                          video.video_type === 'shorts'
-                            ? 'bg-red-600/20 text-red-400 border border-red-600/30'
-                            : 'bg-emerald-600/20 text-emerald-400 border border-emerald-600/30'
-                        }`}>
-                          {video.video_type === 'shorts' ? '9:16' : '16:9'}
-                        </span>
+                    ))}
+                  </SortableContext>
+                </div>
+                <DragOverlay>
+                  {activeId && activeVideo ? (
+                    <div className="flex items-center gap-4 p-4 bg-slate-800 rounded-lg border border-emerald-500 shadow-2xl shadow-emerald-500/50 opacity-90">
+                      <div className="text-emerald-400 flex-shrink-0">
+                        <GripVertical size={24} />
                       </div>
-                      <p className="text-sm text-slate-400 truncate">{video.youtube_url}</p>
-                      <p className="text-xs text-slate-500">
-                        Added {new Date(video.created_at).toLocaleDateString()}
-                      </p>
+                      <div className="relative flex-shrink-0">
+                        <img
+                          src={getYouTubeThumbnail(activeVideo.youtube_id)}
+                          alt="Video thumbnail"
+                          className="w-32 h-20 object-cover rounded"
+                        />
+                        {activeVideo.video_type === 'shorts' && (
+                          <span className="absolute top-1 right-1 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded font-medium">
+                            Shorts
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-white font-medium truncate">{activeVideo.youtube_id}</p>
+                          <span className={`text-xs px-2 py-0.5 rounded ${
+                            activeVideo.video_type === 'shorts'
+                              ? 'bg-red-600/20 text-red-400 border border-red-600/30'
+                              : 'bg-emerald-600/20 text-emerald-400 border border-emerald-600/30'
+                          }`}>
+                            {activeVideo.video_type === 'shorts' ? '9:16' : '16:9'}
+                          </span>
+                        </div>
+                        <p className="text-sm text-slate-400 truncate">{activeVideo.youtube_url}</p>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => handleDeleteVideo(video.id)}
-                      className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                    >
-                      <Trash2 size={20} />
-                    </button>
-                  </div>
-                ))}
-              </div>
+                  ) : null}
+                </DragOverlay>
+              </DndContext>
 
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-2 pt-4 border-t border-slate-700">
@@ -340,6 +551,53 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
           )}
         </div>
       </div>
+
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60]">
+          <div className="bg-slate-800 rounded-xl border border-slate-700 p-6 max-w-md w-full mx-4 shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                <Save className="text-emerald-400" size={24} />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white">Save Video Order?</h3>
+                <p className="text-sm text-slate-400">This will update the display order</p>
+              </div>
+            </div>
+
+            <p className="text-slate-300 mb-6">
+              Are you sure you want to save the new video order? This will change how videos appear on your site.
+            </p>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                disabled={saving}
+                className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmSaveOrder}
+                disabled={saving}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 hover:shadow-lg hover:shadow-emerald-500/25"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save size={18} />
+                    Confirm Save
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
