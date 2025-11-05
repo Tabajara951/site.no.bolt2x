@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Cor de seleção personalizada - Rosa Salmão */
+::selection {
+  background-color: #ff9b8a;
+  color: #ffffff;
+}
+
+::-moz-selection {
+  background-color: #ff9b8a;
+  color: #ffffff;
+}
+
+@keyframes glitchBlink {
+  0%, 45%, 55%, 100% {
+    opacity: 1;
+    text-shadow: 0 0 20px rgba(16,185,129,0.5);
+  }
+  48%, 52% {
+    opacity: 0.3;
+    text-shadow: 0 0 10px rgba(16,185,129,0.3), 2px 0 5px rgba(255,0,0,0.5), -2px 0 5px rgba(0,255,255,0.5);
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes filmGrain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -5%); }
+  20% { transform: translate(-10%, 5%); }
+  30% { transform: translate(5%, -10%); }
+  40% { transform: translate(-5%, 15%); }
+  50% { transform: translate(-15%, 5%); }
+  60% { transform: translate(15%, 0); }
+  70% { transform: translate(0, 10%); }
+  80% { transform: translate(-15%, 0); }
+  90% { transform: translate(10%, 5%); }
+}
+
+@keyframes timelineSlide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100vw);
+  }
+}
+
+.glitch-blink {
+  animation: glitchBlink 4s infinite;
+}
+
+.timeline-track {
+  animation: timelineSlide 20s linear infinite;
+}
+
+/* O Overlay de Blur - cobre a tela e fica no z-index 10 */
+#blur-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+/* Estado ATIVO do Overlay */
+#blur-overlay.active {
+  opacity: 1;
+}
+
+/* Estado NORMAL dos Botões - z-index 1 (abaixo do overlay) */
+.btn-contato {
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s ease;
+}
+
+/* Estado DESTAQUE do Botão - z-index 11 (acima do overlay) */
+.btn-contato.hover-focus {
+  z-index: 11;
+  transform: scale(1.1);
+}
+
