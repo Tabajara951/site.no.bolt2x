@@ -771,26 +771,26 @@ function AppContent() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="min-h-screen flex flex-col items-center justify-center px-6 py-20 relative z-10">
-        <h2 className="text-6xl font-bold mb-16 text-emerald-400 glitch-blink font-orbitron">
+      <section id="about" className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 py-20 relative z-10">
+        <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-8 sm:mb-12 md:mb-16 text-emerald-400 glitch-blink font-orbitron">
           ABOUT ME
         </h2>
 
         {/* CRT Monitor */}
         <div className="relative w-full max-w-5xl">
           {/* Monitor Frame - Beige plastic body */}
-          <div className="relative bg-gradient-to-b from-[#e8dcc8] via-[#d4c4a8] to-[#c4b49a] rounded-[40px] p-12 shadow-2xl">
-            {/* Top vent slots */}
-            <div className="absolute top-6 left-1/2 transform -translate-x-1/2 flex gap-2">
+          <div className="relative bg-gradient-to-b from-[#e8dcc8] via-[#d4c4a8] to-[#c4b49a] rounded-[20px] sm:rounded-[30px] md:rounded-[40px] p-4 sm:p-6 md:p-12 shadow-2xl">
+            {/* Top vent slots - hidden on small screens */}
+            <div className="hidden sm:flex absolute top-4 md:top-6 left-1/2 transform -translate-x-1/2 gap-2">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="w-1 h-4 bg-[#a89880] rounded"></div>
+                <div key={i} className="w-1 h-3 md:h-4 bg-[#a89880] rounded"></div>
               ))}
             </div>
 
             {/* Inner darker bezel */}
-            <div className="bg-gradient-to-b from-[#b8a890] to-[#a89880] rounded-[30px] p-8">
+            <div className="bg-gradient-to-b from-[#b8a890] to-[#a89880] rounded-[15px] sm:rounded-[20px] md:rounded-[30px] p-3 sm:p-4 md:p-8">
               {/* Screen area with curved glass effect */}
-              <div className="relative bg-black rounded-[20px] overflow-hidden aspect-[4/3] border-[6px] border-[#8a7a68] shadow-inner">
+              <div className="relative bg-black rounded-[12px] sm:rounded-[16px] md:rounded-[20px] overflow-hidden border-2 sm:border-4 md:border-[6px] border-[#8a7a68] shadow-inner min-h-[400px] sm:min-h-0 sm:aspect-[4/3]">
                 {/* Glass reflection */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent pointer-events-none z-30"></div>
 
@@ -803,50 +803,50 @@ function AppContent() {
                 <div className="absolute inset-0 bg-emerald-500/10 pointer-events-none z-10"></div>
 
                 {/* Curved screen edges darkening */}
-                <div className="absolute inset-0 pointer-events-none z-20 rounded-[20px]" style={{
+                <div className="absolute inset-0 pointer-events-none z-20 rounded-[12px] sm:rounded-[16px] md:rounded-[20px]" style={{
                   boxShadow: 'inset 0 0 60px 20px rgba(0,0,0,0.6)'
                 }}></div>
 
                 {/* Content */}
-                <div className="relative z-20 h-full flex flex-col justify-center p-8 md:p-16">
-                  <div className="space-y-6 text-left">
-                    <p className="text-emerald-300 text-base md:text-lg leading-relaxed font-space">
+                <div className="relative z-20 h-full flex flex-col justify-center p-4 sm:p-6 md:p-12 lg:p-16">
+                  <div className="space-y-3 sm:space-y-4 md:space-y-6 text-left">
+                    <p className="text-emerald-300 text-sm sm:text-base md:text-lg leading-relaxed font-space">
                       <span className="text-emerald-500">&gt;</span> Hello, I'm Gustavo Rodrigues Barbosa. I'm 20, and for the past 3 years,
                       I've been immersed in the world of editing.
                     </p>
 
-                    <p className="text-emerald-300 text-base md:text-lg leading-relaxed font-space">
+                    <p className="text-emerald-300 text-sm sm:text-base md:text-lg leading-relaxed font-space">
                       <span className="text-emerald-500">&gt;</span> I don't see hours of raw footage as a problem, but as a code to be
                       deciphered. My process goes beyond simply "cutting\"—it's about sculpting
                       time, finding the rhythmic pulse in every scene, and mixing realities.
                     </p>
 
-                    <p className="text-emerald-300 text-base md:text-lg leading-relaxed font-space">
+                    <p className="text-emerald-300 text-sm sm:text-base md:text-lg leading-relaxed font-space">
                       <span className="text-emerald-500">&gt;</span> With a special focus on composition and visual effects (VFX), I don't
                       just assemble a story; I build an atmosphere that keeps the viewer locked
                       in.
                     </p>
 
                     {/* Blinking cursor */}
-                    <div className="flex items-center gap-2 mt-4">
+                    <div className="flex items-center gap-2 mt-2 sm:mt-4">
                       <span className="text-emerald-500 font-space">&gt;</span>
-                      <span className="w-3 h-5 bg-emerald-400 animate-pulse"></span>
+                      <span className="w-2 sm:w-3 h-4 sm:h-5 bg-emerald-400 animate-pulse"></span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Control buttons at bottom */}
-            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-3">
+            {/* Control buttons at bottom - smaller on mobile */}
+            <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2 sm:gap-3">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="w-8 h-2 bg-[#8a7a68] rounded-full shadow-inner"></div>
+                <div key={i} className="w-5 sm:w-6 md:w-8 h-1.5 sm:h-2 bg-[#8a7a68] rounded-full shadow-inner"></div>
               ))}
-              <div className="w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)] ml-2"></div>
+              <div className="w-1.5 sm:w-2 h-1.5 sm:h-2 bg-emerald-500 rounded-full shadow-[0_0_8px_rgba(16,185,129,0.8)] ml-1 sm:ml-2"></div>
             </div>
 
-            {/* Brand label */}
-            <div className="absolute bottom-4 right-8 text-[#8a7a68] text-xs font-bold tracking-widest opacity-60 font-exo">
+            {/* Brand label - hidden on very small screens */}
+            <div className="hidden sm:block absolute bottom-3 md:bottom-4 right-4 md:right-8 text-[#8a7a68] text-xs font-bold tracking-widest opacity-60 font-exo">
               CRT-2000
             </div>
           </div>
