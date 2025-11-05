@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { X, Plus, Trash2, LogOut, Youtube, Loader2, ChevronLeft, ChevronRight, GripVertical, Save, XCircle } from 'lucide-react';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
+import { useState, useEffect, useRef } from 'react';
+import { X, Plus, Trash2, LogOut, Youtube, Loader2, ChevronLeft, ChevronRight, GripVertical, Save, XCircle, ArrowDown, ArrowUp } from 'lucide-react';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, DragOverlay, DragStartEvent, useDroppable, DragOverEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { supabase } from '../lib/supabase';
@@ -17,6 +17,58 @@ const VIDEOS_PER_PAGE = 6;
 interface SortableVideoItemProps {
   video: YouTubeVideo;
   onDelete: (id: string) => void;
+}
+
+interface PageTransitionZoneProps {
+  direction: 'prev' | 'next';
+  isOver: boolean;
+  currentPage: number;
+  totalPages: number;
+}
+
+function PageTransitionZone({ direction, isOver, currentPage, totalPages }: PageTransitionZoneProps) {
+  const { setNodeRef } = useDroppable({
+    id: direction === 'next' ? 'next-page-zone' : 'prev-page-zone',
+  });
+
+  const isPrev = direction === 'prev';
+  const canTransition = isPrev ? currentPage > 1 : currentPage < totalPages;
+
+  if (!canTransition) return null;
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`flex items-center justify-center gap-3 p-4 ${isPrev ? 'mb-3' : 'mt-3'} rounded-lg border-2 border-dashed transition-all ${
+        isOver
+          ? isPrev
+            ? 'border-blue-500 bg-blue-500/20 scale-105'
+            : 'border-emerald-500 bg-emerald-500/20 scale-105'
+          : 'border-slate-600 bg-slate-800/50 hover:border-slate-500 hover:bg-slate-700/50'
+      }`}
+    >
+      {isPrev ? (
+        <ArrowUp size={24} className={isOver ? 'text-blue-400 animate-bounce' : 'text-slate-400'} />
+      ) : (
+        <ArrowDown size={24} className={isOver ? 'text-emerald-400 animate-bounce' : 'text-slate-400'} />
+      )}
+      <span className={`font-medium ${
+        isOver
+          ? isPrev ? 'text-blue-300' : 'text-emerald-300'
+          : 'text-slate-400'
+      }`}>
+        {isOver
+          ? `Changing to ${isPrev ? 'previous' : 'next'} page...`
+          : `Drag here to go to ${isPrev ? 'previous' : 'next'} page`
+        }
+      </span>
+      {isPrev ? (
+        <ArrowUp size={24} className={isOver ? 'text-blue-400 animate-bounce' : 'text-slate-400'} />
+      ) : (
+        <ArrowDown size={24} className={isOver ? 'text-emerald-400 animate-bounce' : 'text-slate-400'} />
+      )}
+    </div>
+  );
 }
 
 function SortableVideoItem({ video, onDelete }: SortableVideoItemProps) {
@@ -104,6 +156,9 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
   const [saving, setSaving] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [isOverNextZone, setIsOverNextZone] = useState(false);
+  const [isOverPrevZone, setIsOverPrevZone] = useState(false);
+  const pageChangeTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -244,8 +299,55 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
     setActiveId(event.active.id as string);
   };
 
+  const handleDragOver = (event: DragOverEvent) => {
+    if (!activeId) return;
+
+    const { over } = event;
+
+    if (over?.id === 'next-page-zone' && currentPage < totalPages) {
+      if (!isOverNextZone) {
+        setIsOverNextZone(true);
+      }
+
+      if (!pageChangeTimerRef.current) {
+        pageChangeTimerRef.current = setTimeout(() => {
+          setCurrentPage(prev => Math.min(prev + 1, totalPages));
+          setIsOverNextZone(false);
+          pageChangeTimerRef.current = null;
+        }, 600);
+      }
+    } else if (over?.id === 'prev-page-zone' && currentPage > 1) {
+      if (!isOverPrevZone) {
+        setIsOverPrevZone(true);
+      }
+
+      if (!pageChangeTimerRef.current) {
+        pageChangeTimerRef.current = setTimeout(() => {
+          setCurrentPage(prev => Math.max(prev - 1, 1));
+          setIsOverPrevZone(false);
+          pageChangeTimerRef.current = null;
+        }, 600);
+      }
+    } else {
+      if (pageChangeTimerRef.current) {
+        clearTimeout(pageChangeTimerRef.current);
+        pageChangeTimerRef.current = null;
+      }
+      setIsOverNextZone(false);
+      setIsOverPrevZone(false);
+    }
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
+    if (pageChangeTimerRef.current) {
+      clearTimeout(pageChangeTimerRef.current);
+      pageChangeTimerRef.current = null;
+    }
+
     setActiveId(null);
+    setIsOverNextZone(false);
+    setIsOverPrevZone(false);
+
     const { active, over } = event;
 
     if (over && active.id !== over.id) {
@@ -460,9 +562,19 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
                 sensors={sensors}
                 collisionDetection={closestCenter}
                 onDragStart={handleDragStart}
+                onDragOver={handleDragOver}
                 onDragEnd={handleDragEnd}
               >
                 <div className="space-y-3 min-h-[400px]">
+                  {activeId && (
+                    <PageTransitionZone
+                      direction="prev"
+                      isOver={isOverPrevZone}
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                    />
+                  )}
+
                   <SortableContext
                     items={videos.map(v => v.id)}
                     strategy={verticalListSortingStrategy}
@@ -475,6 +587,15 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
                       />
                     ))}
                   </SortableContext>
+
+                  {activeId && (
+                    <PageTransitionZone
+                      direction="next"
+                      isOver={isOverNextZone}
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                    />
+                  )}
                 </div>
                 <DragOverlay>
                   {activeId && activeVideo ? (
