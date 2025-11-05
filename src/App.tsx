@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Lottie from 'lottie-react';
-import { Copy, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Copy, Loader2, ChevronLeft, ChevronRight, Hand } from 'lucide-react';
 import { ProfileImageUpload } from './components/ProfileImageUpload';
 import { useProfileImage } from './hooks/useProfileImage';
 import { useYouTubeVideos } from './hooks/useYouTubeVideos';
@@ -558,7 +558,7 @@ function AppContent() {
       </nav>
 
       {/* Hero Section */}
-      <section className="min-h-screen flex flex-col items-center justify-center px-6 pt-20 relative z-10" style={{ background: '#000000' }}>
+      <section id="hero" className="min-h-screen flex flex-col items-center justify-center px-6 pt-20 pb-32 relative z-10" style={{ background: '#000000' }}>
         <div className="mb-8 relative mt-32">
           <div
             className="w-48 h-48 rounded-2xl border-4 border-emerald-500 overflow-hidden shadow-[0_0_30px_rgba(16,185,129,0.5)] cursor-pointer profile-photo-container"
@@ -604,7 +604,7 @@ function AppContent() {
         )}
 
         {/* Video Grid */}
-        <div id="projects" className="mt-32 w-full max-w-6xl">
+        <div id="projects" className="mt-32 mb-20 w-full max-w-6xl">
           {/* Filter Buttons */}
           <div className="flex items-center justify-center gap-6 mb-12">
             <button
@@ -767,6 +767,27 @@ function AppContent() {
               <p className="text-gray-600 font-space text-sm mt-2">Check back soon for new content!</p>
             </div>
           )}
+        </div>
+
+        {/* Hand Holding Projects Section */}
+        <div className="relative w-full max-w-6xl mt-32 mb-20">
+          {/* Hand Icon positioned to look like it's holding the section above */}
+          <div className="flex justify-center items-center">
+            <div className="relative">
+              {/* Decorative line from hand to projects */}
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 w-1 h-24 bg-gradient-to-b from-transparent via-amber-500/50 to-amber-500"></div>
+
+              {/* Hand Icon */}
+              <div className="relative bg-gradient-to-br from-amber-500 to-amber-600 p-8 rounded-full shadow-2xl shadow-amber-500/50 border-4 border-amber-400 hover:scale-110 transition-transform duration-300">
+                <Hand className="w-20 h-20 text-black" strokeWidth={2.5} />
+              </div>
+
+              {/* Text Label */}
+              <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                <p className="text-amber-500 font-orbitron font-bold text-lg tracking-wider">HOLDING IT TOGETHER</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
