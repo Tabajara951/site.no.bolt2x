@@ -94,3 +94,16 @@ html {
   transform: scale(1.1);
 }
 
+/* Scroll offset para seções com navegação */
+#projects {
+  scroll-margin-top: 150px;
+}
+
+#about {
+  scroll-margin-top: 100px;
+}
+
+#contact {
+  scroll-margin-top: 100px;
+}
+
