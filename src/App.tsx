@@ -24,7 +24,6 @@ function AppContent() {
   const { videos, loading: videosLoading } = useYouTubeVideos();
   const { isAuthenticated } = useAdmin();
   const contactButtonsRef = useRef<(HTMLAnchorElement | HTMLButtonElement | null)[]>([]);
-  const videosSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -609,12 +608,7 @@ function AppContent() {
           {/* Filter Buttons */}
           <div className="flex items-center justify-center gap-6 mb-12">
             <button
-              onClick={() => {
-                setVideoFilter('shorts');
-                setTimeout(() => {
-                  videosSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 100);
-              }}
+              onClick={() => setVideoFilter('shorts')}
               className={`px-8 py-3 rounded-full font-orbitron font-bold tracking-wider transition-all duration-300 ${
                 videoFilter === 'shorts'
                   ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/50'
@@ -624,12 +618,7 @@ function AppContent() {
               SHORTS
             </button>
             <button
-              onClick={() => {
-                setVideoFilter('long-form');
-                setTimeout(() => {
-                  videosSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 100);
-              }}
+              onClick={() => setVideoFilter('long-form')}
               className={`px-8 py-3 rounded-full font-orbitron font-bold tracking-wider transition-all duration-300 ${
                 videoFilter === 'long-form'
                   ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/50'
@@ -647,7 +636,7 @@ function AppContent() {
           ) : videos.filter(v =>
               videoFilter === 'shorts' ? v.video_type === 'shorts' : v.video_type === 'normal'
             ).length > 0 ? (
-            <div ref={videosSectionRef} className="space-y-6">
+            <div className="space-y-6">
               {videoFilter === 'shorts' ? (
                 /* SHORTS Carousel - 3 videos at a time */
                 <div className="relative">
