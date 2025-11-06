@@ -642,22 +642,24 @@ function AppContent() {
                 <div className="relative">
                   <div className="overflow-hidden">
                     <div
-                      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-700 ease-out"
+                      className="transition-all duration-700 ease-out"
                       style={{
-                        transform: `translateX(-${shortsCarouselIndex * (100 / 3)}%)`,
-                        width: `${(videos.filter(v => v.video_type === 'shorts').length / 3) * 100}%`
+                        transform: `translateX(-${shortsCarouselIndex * 100}%)`,
+                        width: `${Math.ceil(videos.filter(v => v.video_type === 'shorts').length / 3) * 100}%`
                       }}
                     >
-                      {videos
-                        .filter(v => v.video_type === 'shorts')
-                        .map((video) => (
-                          <VideoEmbed
-                            key={video.id}
-                            videoId={video.youtube_id}
-                            title={video.title}
-                            isShorts={video.video_type === 'shorts'}
-                          />
-                        ))}
+                      <div className="grid grid-cols-3 gap-6">
+                        {videos
+                          .filter(v => v.video_type === 'shorts')
+                          .map((video) => (
+                            <VideoEmbed
+                              key={video.id}
+                              videoId={video.youtube_id}
+                              title={video.title}
+                              isShorts={video.video_type === 'shorts'}
+                            />
+                          ))}
+                      </div>
                     </div>
                   </div>
 
