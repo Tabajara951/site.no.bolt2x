@@ -4,6 +4,43 @@
 
 html {
   scroll-behavior: smooth;
+  color-scheme: only light;
+  -webkit-color-scheme: only light;
+}
+
+body {
+  color-scheme: only light;
+  forced-color-adjust: none;
+  -webkit-forced-color-adjust: none;
+}
+
+#root {
+  isolation: isolate;
+  mix-blend-mode: normal;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+*, *::before, *::after {
+  forced-color-adjust: none;
+  -webkit-forced-color-adjust: none;
+}
+
+iframe {
+  filter: none !important;
+  -webkit-filter: none !important;
+}
+
+@media (inverted-colors: inverted) {
+  html, body, #root {
+    filter: invert(1) hue-rotate(180deg);
+    -webkit-filter: invert(1) hue-rotate(180deg);
+  }
+
+  img, video, iframe {
+    filter: invert(1) hue-rotate(180deg);
+    -webkit-filter: invert(1) hue-rotate(180deg);
+  }
 }
 
 /* Cor de seleção personalizada - Rosa Salmão */
