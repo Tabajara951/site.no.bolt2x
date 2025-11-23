@@ -700,7 +700,7 @@ function AppContent() {
 
                     {/* Second Row - 2 larger videos */}
                     {videos.filter(v => v.video_type === 'normal').slice(longFormCarouselIndex).length > 3 && (
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                         {videos
                           .filter(v => v.video_type === 'normal')
                           .slice(longFormCarouselIndex + 3, longFormCarouselIndex + 5)
