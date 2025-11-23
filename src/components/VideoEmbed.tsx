@@ -8,8 +8,8 @@ interface VideoEmbedProps {
 
 export function VideoEmbed({ videoId, title = 'YouTube video', isShorts = false }: VideoEmbedProps) {
   const containerClass = isShorts
-    ? "relative w-full mx-auto aspect-[9/16] rounded-xl overflow-hidden bg-slate-900 hover:shadow-lg hover:shadow-emerald-500/20 group"
-    : "relative w-full aspect-video rounded-xl overflow-hidden bg-slate-900 hover:shadow-lg hover:shadow-emerald-500/20 group";
+    ? "relative w-full mx-auto aspect-[9/16] rounded-xl overflow-hidden bg-slate-900 group transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] hover:ring-2 hover:ring-emerald-500"
+    : "relative w-full aspect-video rounded-xl overflow-hidden bg-slate-900 group transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] hover:ring-2 hover:ring-emerald-500";
 
   return (
     <div className={containerClass}>
@@ -20,7 +20,6 @@ export function VideoEmbed({ videoId, title = 'YouTube video', isShorts = false 
         allowFullScreen
         className="absolute inset-0 w-full h-full"
       />
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-emerald-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
     </div>
   );
 }
