@@ -17,7 +17,7 @@ function AppContent() {
   const [isDiscordHovered, setIsDiscordHovered] = useState(false);
   const [showAdminLogin, setShowAdminLogin] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
-  const [videoFilter, setVideoFilter] = useState<'shorts' | 'long-form'>('shorts');
+  const [videoFilter, setVideoFilter] = useState<'shorts' | 'long-form'>('long-form');
   const [shortsCarouselIndex, setShortsCarouselIndex] = useState(0);
   const [longFormCarouselIndex, setLongFormCarouselIndex] = useState(0);
   const { imageUrl, updateImageUrl } = useProfileImage();
@@ -608,16 +608,6 @@ function AppContent() {
           {/* Filter Buttons */}
           <div className="flex items-center justify-center gap-6 mb-12">
             <button
-              onClick={() => setVideoFilter('shorts')}
-              className={`px-8 py-3 rounded-full font-orbitron font-bold tracking-wider transition-all duration-300 ${
-                videoFilter === 'shorts'
-                  ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/50'
-                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
-              }`}
-            >
-              SHORTS
-            </button>
-            <button
               onClick={() => setVideoFilter('long-form')}
               className={`px-8 py-3 rounded-full font-orbitron font-bold tracking-wider transition-all duration-300 ${
                 videoFilter === 'long-form'
@@ -626,6 +616,16 @@ function AppContent() {
               }`}
             >
               LONG-FORM
+            </button>
+            <button
+              onClick={() => setVideoFilter('shorts')}
+              className={`px-8 py-3 rounded-full font-orbitron font-bold tracking-wider transition-all duration-300 ${
+                videoFilter === 'shorts'
+                  ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/50'
+                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white'
+              }`}
+            >
+              SHORTS
             </button>
           </div>
 
