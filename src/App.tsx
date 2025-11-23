@@ -871,7 +871,6 @@ function AppContent() {
               rel="noopener noreferrer"
               className="btn-contato group relative flex flex-row items-center justify-center bg-black border border-gray-700 rounded-full px-8 py-6 hover:border-gray-500 transition-all gap-4 overflow-visible cursor-pointer"
             >
-              <div className="absolute inset-0 bg-black rounded-full opacity-0 group-hover:opacity-100 transition-opacity -z-10" style={{ backdropFilter: 'blur(8px)', transform: 'scale(1.05)' }}></div>
               <img src="/icons8-twitter-96 copy.png" alt="X/Twitter" className="relative z-10 w-12 h-12 flex-shrink-0" />
               <div className="flex flex-col items-center flex-1">
                 <span className="relative z-10 font-space text-sm tracking-widest uppercase text-gray-300 select-text">MY TWITTER/X.COM</span>

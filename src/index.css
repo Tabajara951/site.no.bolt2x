@@ -142,6 +142,14 @@ img, video, iframe, picture {
   -webkit-filter: none !important;
 }
 
+/* Garantir que todos os elementos dentro dos botões não sejam afetados pelo blur */
+.btn-contato.hover-focus * {
+  filter: none !important;
+  -webkit-filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
 /* Scroll offset para seções com navegação */
 #projects {
   scroll-margin-top: 150px;
