@@ -682,9 +682,9 @@ function AppContent() {
               ) : (
                 /* LONG-FORM Videos - Carousel with 8 videos per page (3+2+3) */
                 <div className="relative">
-                  <div className="space-y-6">
+                  <div className="space-y-8">
                     {/* First Row - 3 videos */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                       {videos
                         .filter(v => v.video_type === 'normal')
                         .slice(longFormCarouselIndex, longFormCarouselIndex + 3)
@@ -700,12 +700,12 @@ function AppContent() {
 
                     {/* Second Row - 2 larger videos */}
                     {videos.filter(v => v.video_type === 'normal').slice(longFormCarouselIndex).length > 3 && (
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         {videos
                           .filter(v => v.video_type === 'normal')
                           .slice(longFormCarouselIndex + 3, longFormCarouselIndex + 5)
                           .map((video) => (
-                            <div key={video.id} className="scale-110">
+                            <div key={video.id} className="scale-[1.15]">
                               <VideoEmbed
                                 videoId={video.youtube_id}
                                 title={video.title}
@@ -718,7 +718,7 @@ function AppContent() {
 
                     {/* Third Row - 3 videos */}
                     {videos.filter(v => v.video_type === 'normal').slice(longFormCarouselIndex).length > 5 && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {videos
                           .filter(v => v.video_type === 'normal')
                           .slice(longFormCarouselIndex + 5, longFormCarouselIndex + 8)
