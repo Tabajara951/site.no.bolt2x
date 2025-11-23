@@ -15,7 +15,6 @@ body {
 }
 
 #root {
-  isolation: isolate;
   mix-blend-mode: normal;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
@@ -113,13 +112,14 @@ img, video, iframe, picture {
   width: 100vw;
   height: 100vh;
   z-index: 10;
-  backdrop-filter: blur(5px) !important;
-  -webkit-backdrop-filter: blur(5px) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
   filter: none !important;
   -webkit-filter: none !important;
+  will-change: opacity, backdrop-filter;
 }
 
 /* Estado ATIVO do Overlay */
@@ -132,18 +132,22 @@ img, video, iframe, picture {
   position: relative;
   z-index: 1;
   transition: transform 0.3s ease;
+  isolation: isolate;
 }
 
 /* Estado DESTAQUE do Botão - z-index 11 (acima do overlay) */
 .btn-contato.hover-focus {
-  z-index: 11;
+  z-index: 11 !important;
   transform: scale(1.1);
   filter: none !important;
   -webkit-filter: none !important;
+  isolation: isolate;
 }
 
 /* Garantir que todos os elementos dentro dos botões não sejam afetados pelo blur */
-.btn-contato.hover-focus * {
+.btn-contato.hover-focus *,
+.btn-contato.hover-focus *::before,
+.btn-contato.hover-focus *::after {
   filter: none !important;
   -webkit-filter: none !important;
   backdrop-filter: none !important;
