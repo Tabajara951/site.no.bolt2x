@@ -12,6 +12,8 @@ body {
   color-scheme: only light;
   forced-color-adjust: none;
   -webkit-forced-color-adjust: none;
+  filter: invert(0) !important;
+  -webkit-filter: invert(0) !important;
 }
 
 #root {
@@ -19,6 +21,8 @@ body {
   mix-blend-mode: normal;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  filter: invert(0) !important;
+  -webkit-filter: invert(0) !important;
 }
 
 *, *::before, *::after {
@@ -26,20 +30,27 @@ body {
   -webkit-forced-color-adjust: none;
 }
 
-iframe {
+img, video, iframe, picture {
   filter: none !important;
   -webkit-filter: none !important;
 }
 
 @media (inverted-colors: inverted) {
-  html, body, #root {
-    filter: invert(1) hue-rotate(180deg);
-    -webkit-filter: invert(1) hue-rotate(180deg);
+  html {
+    filter: invert(1) hue-rotate(180deg) !important;
+    -webkit-filter: invert(1) hue-rotate(180deg) !important;
   }
 
-  img, video, iframe {
-    filter: invert(1) hue-rotate(180deg);
-    -webkit-filter: invert(1) hue-rotate(180deg);
+  img, video, iframe, picture {
+    filter: invert(1) hue-rotate(180deg) !important;
+    -webkit-filter: invert(1) hue-rotate(180deg) !important;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  html, body, #root {
+    filter: none !important;
+    -webkit-filter: none !important;
   }
 }
 
