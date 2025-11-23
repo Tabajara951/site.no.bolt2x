@@ -12,8 +12,6 @@ body {
   color-scheme: only light;
   forced-color-adjust: none;
   -webkit-forced-color-adjust: none;
-  filter: invert(0) !important;
-  -webkit-filter: invert(0) !important;
 }
 
 #root {
@@ -21,8 +19,6 @@ body {
   mix-blend-mode: normal;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  filter: invert(0) !important;
-  -webkit-filter: invert(0) !important;
 }
 
 *, *::before, *::after {
@@ -117,11 +113,13 @@ img, video, iframe, picture {
   width: 100vw;
   height: 100vh;
   z-index: 10;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
+  filter: none !important;
+  -webkit-filter: none !important;
 }
 
 /* Estado ATIVO do Overlay */
@@ -140,6 +138,8 @@ img, video, iframe, picture {
 .btn-contato.hover-focus {
   z-index: 11;
   transform: scale(1.1);
+  filter: none !important;
+  -webkit-filter: none !important;
 }
 
 /* Scroll offset para seções com navegação */
