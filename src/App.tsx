@@ -700,12 +700,12 @@ function AppContent() {
 
                     {/* Second Row - 2 larger videos */}
                     {videos.filter(v => v.video_type === 'normal').slice(longFormCarouselIndex).length > 3 && (
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-24">
                         {videos
                           .filter(v => v.video_type === 'normal')
                           .slice(longFormCarouselIndex + 3, longFormCarouselIndex + 5)
-                          .map((video) => (
-                            <div key={video.id} className="scale-[1.15]">
+                          .map((video, index) => (
+                            <div key={video.id} className={`scale-[1.15] ${index === 0 ? 'lg:-translate-x-8' : 'lg:translate-x-8'}`}>
                               <VideoEmbed
                                 videoId={video.youtube_id}
                                 title={video.title}
